@@ -46,19 +46,19 @@ def decomposed(factor,recovered,l):
     return np.reshape(decompose,(recovered.shape[0],l))
 
 # Boolean, as an switch to change the code between acc_vs_samples and acc_vs_reduced_dimension
-acc_vs_samples = False
+acc_vs_samples = True
 # Empty list to store the accuracies at each step
 acc_dict=[]
 # fixed to 122, here for MLP. l is the reduced_dimension variable
 l=122
 
 # loop over redced dimension or samples
-for l in range(2,283,10):
-#for samples in range (2,34):
+#for l in range(2,283,10):
+for samples in range (2,34):
     # Empty list declared to store accuraces, everytime the expriment is repeated
     acc=[]
     # Repeatation loop
-    for repeat in range(1):
+    for repeat in range(1,500):
         # Tucker is applied on tensor of each category to obtain core and factors
         core10,factor10 = tucker(recovered10, ranks = [recovered10.shape[0],1,l])
         core50,factor50 = tucker(recovered50, ranks =  [recovered50.shape[0],1,l])
