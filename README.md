@@ -29,17 +29,16 @@ Fig. 3: Recovered - 95% data. Subplot 1: X axis, subplot 2: Y axis, subplot 3: Z
 #### Method
 Run main.py to obtain results. To obtain results for acc_vs_reduced_dimension set acc_vs_samples = False. To obtain results for acc_vs_samples, set acc_vs_samples = True. The classifiers choosen are Multi Layer Perceptron(MLP) and k-Nearest Neighbors (kNN). MLP are best to obtain non linear approximation while using multiple hidden layers while the kNN nearest neighbors represent the model based on it distance to the k nearest neighbors. 
 
-### Installing
+### Installing and Executing
 
 Clone this repository
 
 ```
-git clone
-ssh://git@git.wardrobe.irobot.com:7999/~kbichave/parameter-iterative-coordinate-descent.git
+$ git clone https://github.com/kbichave/tensor-decomposition-for-gaits.git
+$ cd tensor-decomposition-for-gaits
+$ pip install -r requirements.txt
+$ python main.py
 
-cd parameter-iterative-coordinate-descent
-
-export PICD=$PWD
 ```
 
 
