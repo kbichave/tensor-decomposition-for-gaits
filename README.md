@@ -37,7 +37,8 @@ Clone this repository
 $ git clone https://github.com/kbichave/tensor-decomposition-for-gaits.git
 $ cd tensor-decomposition-for-gaits
 $ pip install -r requirements.txt
-$ python main.py
+$ python main.py --samples # run this for acc_vs_samples
+$ python main.py --dimension # run this for acc_vs_ReducedDimension
 
 ```
 
