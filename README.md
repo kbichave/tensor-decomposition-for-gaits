@@ -17,6 +17,7 @@ Dataset
 This dataset is made up of three classes. Each class comprises of samples of a subject walking, during different stages of recovery from injury. The stages chosen for data were 10% recovered, 50% recovered and 95% recovered. The data consists of tri-axial accelerometer readings for the sensor mounted on heel of the subject. The data is organized in the form of tensor and each tensor is organized in the .mat file namely, recovered10.mat, recovered50.mat and recovered95.mat. The dataset has been re created. That is, the chopping procedure for each step has been re defined in accordance to the last meeting of Fall semester attended by Dr. Ivan Puchades, Tristan Scott and Kshitij Bichave.
 
 ![alt text](https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/recovered10.png)
+
 Fig. 1: Recovered - 10% data. Subplot 1: X axis, subplot 2: Y axis, subplot 3: Z axis. On the x axis of each subplot data points. On the y axis of each plot is acceleration (g).
 
 
