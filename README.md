@@ -44,7 +44,7 @@ $ python main.py
 ### Results
 
 <p align="center">
-    <img src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_reduced_dimension.png">
+    <img src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_reducedDimension.png">
 </p>
 
 Fig. 4: Accuracys vs Reduced Dimension
