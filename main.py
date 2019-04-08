@@ -46,15 +46,15 @@ def decomposed(factor,recovered,l):
     return np.reshape(decompose,(recovered.shape[0],l))
 
 # Boolean, as an switch to change the code between acc_vs_samples and acc_vs_reduced_dimension
-acc_vs_samples = True
+acc_vs_samples = False
 # Empty list to store the accuracies at each step
 acc_dict=[]
 # fixed to 122, here for MLP. l is the reduced_dimension variable
 l=122
 
 # loop over redced dimension or samples
-#for l in range(2,283,10):
-for samples in range (2,34,2):
+for l in range(2,283,10):
+#for samples in range (2,34):
     # Empty list declared to store accuraces, everytime the expriment is repeated
     acc=[]
     # Repeatation loop
@@ -123,13 +123,13 @@ _classifiers = ['kNN', 'MLP', 'SVM', 'Nearest Centroid']
 if acc_vs_samples:
     fig = plt.figure()
     for _ in range(4):
-        plt.plot([i for i in range(2,34,2)], acc_dict[:,_], label = _classifiers[_])
+        plt.plot([i for i in range(2,34)], acc_dict[:,_], label = _classifiers[_])
     fig.suptitle("Accuracy vs Samples")
     plt.xlabel("Samples")
     plt.ylabel("Accuracy")
     plt.legend( loc='lower right')
-    plt.show()
     plt.savefig('Figures/acc_vs_samples.png')
+    plt.show()
 else:
     fig = plt.figure()
     for _ in range(4):
@@ -138,8 +138,8 @@ else:
     plt.xlabel("Reduced Dimension")
     plt.ylabel("Accuracy")
     plt.legend( loc='lower right')
-    plt.show()
     plt.savefig('Figures/acc_vs_reducedDimension.png')
+    plt.show()
     print('Index of max: ', np.argmax(acc_dict))
 
     
