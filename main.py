@@ -19,13 +19,13 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors.nearest_centroid import NearestCentroid
 # Load tensors for 10%, 50% and 95% recovered data
-recovered10 = sio.loadmat('recovered10.mat')
+recovered10 = sio.loadmat('Data/recovered10.mat')
 recovered10 = recovered10['recovered10']
 
-recovered50 = sio.loadmat('recovered50.mat')
+recovered50 = sio.loadmat('Data/recovered50.mat')
 recovered50 = recovered50['recovered50']
 
-recovered95 = sio.loadmat('recovered95.mat')
+recovered95 = sio.loadmat('Data/recovered95.mat')
 recovered95 = recovered95['recovered95_1']
 
 #function to decompose the matrix based on factors obtained
@@ -54,11 +54,11 @@ l=122
 
 # loop over redced dimension or samples
 #for l in range(2,283,10):
-for samples in range (2,34):
+for samples in range (2,34,2):
     # Empty list declared to store accuraces, everytime the expriment is repeated
     acc=[]
     # Repeatation loop
-    for repeat in range(1,500):
+    for repeat in range(1):
         # Tucker is applied on tensor of each category to obtain core and factors
         core10,factor10 = tucker(recovered10, ranks = [recovered10.shape[0],1,l])
         core50,factor50 = tucker(recovered50, ranks =  [recovered50.shape[0],1,l])
@@ -129,6 +129,7 @@ if acc_vs_samples:
     plt.ylabel("Accuracy")
     plt.legend( loc='lower right')
     plt.show()
+    plt.savefig('Figures/acc_vs_samples.png')
 else:
     fig = plt.figure()
     for _ in range(4):
@@ -138,6 +139,7 @@ else:
     plt.ylabel("Accuracy")
     plt.legend( loc='lower right')
     plt.show()
+    plt.savefig('Figures/acc_vs_reducedDimension.png')
     print('Index of max: ', np.argmax(acc_dict))
 
     
