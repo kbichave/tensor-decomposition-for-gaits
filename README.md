@@ -1,4 +1,4 @@
-# tensor-decomposition-for-gaits
+# Tensor Decomposition for Gaits
 
 Not to be distributed outside SPAN-PACER Lab
 
