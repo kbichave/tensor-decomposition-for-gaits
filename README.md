@@ -39,7 +39,7 @@ $ cd tensor-decomposition-for-gaits
 $ pip install -r requirements.txt
 $ python main.py --samples # run this for acc_vs_samples
 $ python main.py --dimension # run this for acc_vs_ReducedDimension
-
+$ python main.py --all # run this for acc_vs_ReducedDimension_vs_Samples
 ```
 
 ### Results
