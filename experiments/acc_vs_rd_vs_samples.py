@@ -18,9 +18,12 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors.nearest_centroid import NearestCentroid
+import random
+from mpl_toolkits.mplot3d import Axes3D
+
 # Load tensors for 10%, 50% and 95% recovered data
 
-class AccVsReducedDimension:
+class AccVsReducedDimensionVsSamples:
     def __init__(self):
         recovered10 = sio.loadmat('Data/recovered10.mat')
         self.recovered10 = recovered10['recovered10']
@@ -63,8 +66,6 @@ class AccVsReducedDimension:
         return np.reshape(decompose,(recovered.shape[0],l))
     
     def run_exp(self):
-        # Boolean, as an switch to change the code between acc_vs_samples and acc_vs_reduced_dimension
-        acc_vs_samples = False
         # Empty list to store the accuracies at each step
         acc_dict=[]
         # fixed to 122. l is the reduced_dimension variable
@@ -72,65 +73,62 @@ class AccVsReducedDimension:
 
         # loop over redced dimension or samples
         for l in range(2,283,10):
+            acc_samples = []
+            for samples in range (2,30):
             # Empty list declared to store accuraces, everytime the expriment is repeated
-            acc=[]
+                acc=[]
             # Repeatation loop
-            for repeat in range(1,500):
-                import random
-        
-                _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), self.num_train),:,:]
-                _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), self.num_train),:,:]
-                _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), self.num_train),:,:]
+                for repeat in range(1,500):
+                    
+                    _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), samples),:,:]
+                    _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), samples),:,:]
+                    _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), samples),:,:]
+                    
+                    # Tucker is applied on tensor of each category to obtain core and factors
+                    core10,factor10 = tucker(_recovered10, ranks = [_recovered10.shape[0],1,l])
+                    core50,factor50 = tucker(_recovered50, ranks =  [_recovered50.shape[0],1,l])
+                    core95,factor95 = tucker(_recovered95, ranks =  [_recovered95.shape[0],1,l])
+                    # Tensor of each category is decompsed based on the factors obtained earlier
+                    _decomposed10 = self.decomposed(factor10, _recovered10,l)
+                    _decomposed50 = self.decomposed(factor50, _recovered50,l)
+                    _decomposed95 = self.decomposed(factor95, _recovered95,l)
 
-                
-                # Tucker is applied on tensor of each category to obtain core and factors
-                core10,factor10 = tucker(_recovered10, ranks = [_recovered10.shape[0],1,l])
-                core50,factor50 = tucker(_recovered50, ranks =  [_recovered50.shape[0],1,l])
-                core95,factor95 = tucker(_recovered95, ranks =  [_recovered95.shape[0],1,l])
-                # Tensor of each category is decompsed based on the factors obtained earlier
-                _decomposed10 = self.decomposed(factor10, _recovered10,l)
-                _decomposed50 = self.decomposed(factor50, _recovered50,l)
-                _decomposed95 = self.decomposed(factor95, _recovered95,l)
-
-                test_decomposed10 = self.decomposed(factor10, self.recovered10_test,l)
-                test_decomposed50 = self.decomposed(factor50, self.recovered50_test,l)
-                test_decomposed95 = self.decomposed(factor95, self.recovered95_test,l)
-                
-
-                if not acc_vs_samples:
-                    print('Reduced Dimension: %i, Repeat: %i'%(l,repeat))
-                    _Y = np.ravel(np.array([[1]*self.num_train + [2]*self.num_train + [3]*self.num_train]))
+                    test_decomposed10 = self.decomposed(factor10, self.recovered10_test,l)
+                    test_decomposed50 = self.decomposed(factor50, self.recovered50_test,l)
+                    test_decomposed95 = self.decomposed(factor95, self.recovered95_test,l)
+                    
+                    print('Sample: %i, Repeat: %i'%(samples,repeat))
+                    _Y = np.ravel(np.array([[1]*samples + [2]*samples + [3]*samples]))
                     X = np.concatenate((_decomposed10, _decomposed50, _decomposed95))
 
-                # The data into training-testing 
-                xtrain = X
-                xtest = np.concatenate((test_decomposed10,test_decomposed50,test_decomposed95))
-                ytrain = _Y
-                ytest = np.ravel(np.array([[1]*self.num_test + [2]*self.num_test + [3]*self.num_test]))
-                # Classifiers are imported fsrom Sklearn, trained and tested. Accuracies are written
+                    # The data into training-testing 
+                    xtrain = X
+                    xtest = np.concatenate((test_decomposed10,test_decomposed50,test_decomposed95))
+                    ytrain = _Y
+                    ytest = np.ravel(np.array([[1]*self.num_test + [2]*self.num_test + [3]*self.num_test]))
+                    # Classifiers are imported fsrom Sklearn, trained and tested. Accuracies are written
 
 
-                #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
-                clf = KNeighborsClassifier(n_neighbors=3)
-                clf.fit(xtrain,ytrain)
-                ypreds_knn = clf.predict(xtest)
+                    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
+                    clf = KNeighborsClassifier(n_neighbors=3)
+                    clf.fit(xtrain,ytrain)
+                    ypreds_knn = clf.predict(xtest)
 
-                clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
-                clf.fit(xtrain,ytrain)
-                ypreds_mlp = clf.predict(xtest)
+                    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
+                    clf.fit(xtrain,ytrain)
+                    ypreds_mlp = clf.predict(xtest)
 
-                clf = SVC(gamma='auto')
-                clf.fit(xtrain,ytrain)
-                ypreds_svm = clf.predict(xtest)
+                    clf = SVC(gamma='auto')
+                    clf.fit(xtrain,ytrain)
+                    ypreds_svm = clf.predict(xtest)
 
-                clf = NearestCentroid()
-                clf.fit(xtrain,ytrain)
-                ypreds_nc = clf.predict(xtest)
+                    clf = NearestCentroid()
+                    clf.fit(xtrain,ytrain)
+                    ypreds_nc = clf.predict(xtest)
 
-
-                acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_mlp), accuracy_score(ytest, ypreds_svm), accuracy_score(ytest, ypreds_nc)]))
-            acc_dict.append(np.mean(acc, axis=0))
-            
+                    acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_mlp), accuracy_score(ytest, ypreds_svm), accuracy_score(ytest, ypreds_nc)]))
+                acc_samples.append(np.mean(acc, axis=0))
+            acc_dict.append(acc_samples)
         # To save accuracies as an checkpoint for later use
         with open('acc_dict.txt', 'w') as f:
             for item in np.array(acc_dict):

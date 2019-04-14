@@ -18,6 +18,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors.nearest_centroid import NearestCentroid
+import random
 # Load tensors for 10%, 50% and 95% recovered data
 
 class AccVsSamples:
@@ -30,6 +31,18 @@ class AccVsSamples:
 
         recovered95 = sio.loadmat('Data/recovered95.mat')
         self.recovered95 = recovered95['recovered95_1']
+
+        self.num_test = 4
+        self.recovered10_test = self.recovered10[-self.num_test:,:,:]
+        self.recovered10 = self.recovered10[:len(self.recovered10)-4,:,:]
+
+        self.recovered50_test = self.recovered50[-self.num_test:,:,:]
+        self.recovered50 = self.recovered50[:len(self.recovered50)-4,:,:]
+
+        self.recovered95_test = self.recovered95[-self.num_test:,:,:]
+        self.recovered95 = self.recovered95[:len(self.recovered95)-4:,:]
+
+
         self.acc_dict = []
 
     #function to decompose the matrix based on factors obtained
@@ -54,45 +67,48 @@ class AccVsSamples:
         acc_vs_samples = True
         # Empty list to store the accuracies at each step
         acc_dict=[]
-        # fixed to 122, here for MLP. l is the reduced_dimension variable
-        l=122
+        # fixed to 122. l is the reduced_dimension variable
+        l=18
 
         # loop over redced dimension or samples
         #for l in range(2,283,10):
-        for samples in range (2,34):
+        for samples in range (2,30):
             # Empty list declared to store accuraces, everytime the expriment is repeated
             acc=[]
             # Repeatation loop
             for repeat in range(1,500):
+                _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), samples),:,:]
+                _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), samples),:,:]
+                _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), samples),:,:]
+                
                 # Tucker is applied on tensor of each category to obtain core and factors
-                core10,factor10 = tucker(self.recovered10, ranks = [self.recovered10.shape[0],1,l])
-                core50,factor50 = tucker(self.recovered50, ranks =  [self.recovered50.shape[0],1,l])
-                core95,factor95 = tucker(self.recovered95, ranks =  [self.recovered95.shape[0],1,l])
+                core10,factor10 = tucker(_recovered10, ranks = [_recovered10.shape[0],1,l])
+                core50,factor50 = tucker(_recovered50, ranks =  [_recovered50.shape[0],1,l])
+                core95,factor95 = tucker(_recovered95, ranks =  [_recovered95.shape[0],1,l])
                 # Tensor of each category is decompsed based on the factors obtained earlier
-                _decomposed10 = self.decomposed(factor10, self.recovered10,l)
-                _decomposed50 = self.decomposed(factor50, self.recovered50,l)
-                _decomposed95 = self.decomposed(factor95, self.recovered95,l)
+                _decomposed10 = self.decomposed(factor10, _recovered10,l)
+                _decomposed50 = self.decomposed(factor50, _recovered50,l)
+                _decomposed95 = self.decomposed(factor95, _recovered95,l)
+
+                test_decomposed10 = self.decomposed(factor10, self.recovered10_test,l)
+                test_decomposed50 = self.decomposed(factor50, self.recovered50_test,l)
+                test_decomposed95 = self.decomposed(factor95, self.recovered95_test,l)
+                
                 
                 # Switch to execute acc_vs_samples branch here
                 if acc_vs_samples:
-                    t=np.random.randint((self.recovered10.shape[0]+self.recovered50.shape[0]+self.recovered95.shape[0]),size= samples)
+                    # t=np.random.randint((self.recovered10.shape[0]+self.recovered50.shape[0]+self.recovered95.shape[0]),size= samples)
                     print('Sample: %i, Repeat: %i'%(samples,repeat))
-                    decomposed10 = _decomposed10[np.random.randint((len(_decomposed10)),size= samples)]
-                    decomposed50 = _decomposed50[np.random.randint((len(_decomposed50)),size= samples)]
-                    decomposed95 = _decomposed95[np.random.randint((len(_decomposed95)),size= samples)]
                     _Y = np.ravel(np.array([[1]*samples + [2]*samples + [3]*samples]))
-                    X = np.concatenate((decomposed10, decomposed50, decomposed95))
-
-                # Switch to execute acc_vs_reduced_samples branch
-                else:
-                    print('Reduced Dimension: %i, Repeat: %i'%(l,repeat))
-                    _Y = np.ravel(np.array([[1]*self.recovered10.shape[0] + [2]*self.recovered50.shape[0] + [3]*self.recovered95.shape[0]]))
                     X = np.concatenate((_decomposed10, _decomposed50, _decomposed95))
 
-                # The data is split into training-testing 
                 
-                xtrain, xtest, ytrain, ytest = train_test_split(X, _Y, test_size=0.33, random_state=42)
-                
+
+                # The data into training-testing 
+                xtrain = X
+                xtest = np.concatenate((test_decomposed10,test_decomposed50,test_decomposed95))
+                ytrain = _Y
+                ytest = np.ravel(np.array([[1]*self.num_test + [2]*self.num_test + [3]*self.num_test]))
                 # Classifiers are imported fsrom Sklearn, trained and tested. Accuracies are written
 
 
@@ -128,30 +144,16 @@ class AccVsSamples:
         if acc_vs_samples:
             fig = plt.figure()
             for _ in range(4):
-                plt.plot([i for i in range(2,34)], acc_dict[:,_], label = _classifiers[_])
+                plt.plot([i for i in range(2,30)], acc_dict[:,_], label = _classifiers[_])
             fig.suptitle("Accuracy vs Samples")
             plt.xlabel("Samples")
             plt.ylabel("Accuracy")
             plt.legend( loc='lower right')
             plt.savefig('Figures/acc_vs_samples.png')
             plt.show()
-        else:
-            fig = plt.figure()
-            for _ in range(4):
-                plt.plot([i for i in range(2,283,10)], acc_dict[:,_], label = _classifiers[_])
-            fig.suptitle("Accuracy vs Reduced Dimension")
-            plt.xlabel("Reduced Dimension")
-            plt.ylabel("Accuracy")
-            plt.legend( loc='lower right')
-            plt.savefig('Figures/acc_vs_reducedDimension.png')
-            plt.show()
-            print('Index of max: ', np.argmax(acc_dict))
+
 
             
             
-            
-        for x in range(3):
-            for y in range(recovered95.shape[0]):
-                plt.subplot(3,1,x+1)
-                plt.plot(recovered95[y,x,:])
+
             

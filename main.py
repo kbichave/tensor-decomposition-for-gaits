@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Mon Feb 18 13:04:45 2019
 
 @author: kbich
 """
 
-import os, argparse
+import argparse
 from experiments.acc_vs_rd import AccVsReducedDimension
 from experiments.acc_vs_samples import AccVsSamples
 
