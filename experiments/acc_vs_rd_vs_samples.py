@@ -97,7 +97,7 @@ class AccVsReducedDimensionVsSamples:
                     test_decomposed50 = self.decomposed(factor50, self.recovered50_test,l)
                     test_decomposed95 = self.decomposed(factor95, self.recovered95_test,l)
                     
-                    print('Sample: %i, Repeat: %i'%(samples,repeat))
+                    print('Reduced Dimension: %i, Sample: %i, Repeat: %i'%(l,samples,repeat))
                     _Y = np.ravel(np.array([[1]*samples + [2]*samples + [3]*samples]))
                     X = np.concatenate((_decomposed10, _decomposed50, _decomposed95))
 
@@ -137,15 +137,13 @@ class AccVsReducedDimensionVsSamples:
 
         _classifiers = ['kNN', 'MLP', 'SVM', 'Nearest Centroid']
         # Plotting
+        hf = plt.figure()
+        ha = hf.add_subplot(111, projection='3d')
+        x = [i for i in range(2,283,18)]
+        y = [i for i in range(2,30)]
+        X, Y = np.meshgrid(x, y)  # `plot_surface` expects `x` and `y` data to be 2D
+        for _ in range(4):
+            ha.plot_surface(X, Y, acc_dict[:,_], label = _classifiers[_])
+        plt.show()
 
-        if not acc_vs_samples:
-            fig = plt.figure()
-            for _ in range(4):
-                plt.plot([i for i in range(2,283,10)], acc_dict[:,_], label = _classifiers[_])
-            fig.suptitle("Accuracy vs Reduced Dimension")
-            plt.xlabel("Reduced Dimension")
-            plt.ylabel("Accuracy")
-            plt.legend( loc='lower right')
-            plt.savefig('Figures/acc_vs_reducedDimension.png')
-            plt.show()
-            print('Index of max: ', np.argmax(acc_dict))
+        
