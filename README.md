@@ -61,4 +61,4 @@ Fig. 5: Accuracy vs Samples
 [PM: Present the structure of the tensor; discuss the tensor decomposition algorithm considered]
 [PM: Discuss the results and compare]
 [PM: Requested study on varying d(dimension) and #training (mesh plot)]
-[PM: Export this report in PDF and share with Dr. Puchades who does not use GITHUB]
+[PM: Export this report in PDF and share with Dr. Puchades and me via email]
