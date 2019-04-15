@@ -54,4 +54,10 @@ Fig. 4: Accuracys vs Reduced Dimension
     <img  src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_samples.png">
 </p>
 
-Fig. 5: Accuracy vs Samples [PM: Please specify the simulation details (crossvalidation method; number of realizations; reduced dimension; etc.)]
+Fig. 5: Accuracy vs Samples 
+[PM: Please specify the simulation details (k; crossvalidation method; number of realizations; reduced dimension; etc.)]
+[PM: Present the classifiers used in more detail. E.g., how was the MLP implmented]
+[PM: Cite any papers needed for the methods used]
+[PM: Present the structure of the tensor; discuss the tensor decomposition algorithm considered]
+[PM: Discuss the results and compare]
+[PM: Requested study on varying d(dimension) and #training (mesh plot)]
