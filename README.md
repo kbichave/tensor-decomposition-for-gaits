@@ -50,9 +50,8 @@ $ python main.py --all # run this for acc_vs_ReducedDimension_vs_Samples
 </p>
 Fig. 4: Accuracys vs Reduced Dimension
 
-
 <p align="center">
     <img  src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_samples.png">
 </p>
 
-Fig. 5: Accuracy vs Samples
+Fig. 5: Accuracy vs Samples [PM: Please specify the simulation details (crossvalidation method; number of realizations; reduced dimension; etc.)]
