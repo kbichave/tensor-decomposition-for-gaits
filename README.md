@@ -63,7 +63,7 @@ Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30
 * [k- Nearest Neighbour](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
 * [Nearest Centroid](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestCentroid.html)
 
-
+Link to PDF version of this file: [Click Here](https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/PDFs/README.pdf)
 [PM: Please specify the simulation details (k; crossvalidation method; number of realizations; reduced dimension; etc.)]
 [PM: Present the classifiers used in more detail. E.g., how was the MLP implmented]
 [PM: Cite any papers needed for the methods used]
