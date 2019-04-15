@@ -48,13 +48,14 @@ $ python main.py --all # run this for acc_vs_ReducedDimension_vs_Samples
     <img src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_reducedDimension.png">
     
 </p>
-Fig. 4: Accuracys vs Reduced Dimension
+Fig. 4: Accuracys vs Reduced Dimension | Number of training samples per class: 25, Number of test samples per class: 4, Number of realizations: 500. MLP architecture:
 
 <p align="center">
     <img  src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_samples.png">
 </p>
 
-Fig. 5: Accuracy vs Samples 
+Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30, Number of test samples: 4, reduced dimension l = 18, Number of realizations:500. MLP architecture: 
+
 [PM: Please specify the simulation details (k; crossvalidation method; number of realizations; reduced dimension; etc.)]
 [PM: Present the classifiers used in more detail. E.g., how was the MLP implmented]
 [PM: Cite any papers needed for the methods used]
