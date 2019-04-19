@@ -19,6 +19,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors.nearest_centroid import NearestCentroid
 import random
+from sklearn.metrics import confusion_matrix
+
 # Load tensors for 10%, 50% and 95% recovered data
 
 class AccVsSamples:
@@ -31,8 +33,9 @@ class AccVsSamples:
 
         recovered95 = sio.loadmat('Data/recovered95.mat')
         self.recovered95 = recovered95['recovered95_1']
-
-        self.num_test = 4
+        
+        self.num_test = 10
+        '''
         self.recovered10_test = self.recovered10[-self.num_test:,:,:]
         self.recovered10 = self.recovered10[:len(self.recovered10)-4,:,:]
 
@@ -41,7 +44,7 @@ class AccVsSamples:
 
         self.recovered95_test = self.recovered95[-self.num_test:,:,:]
         self.recovered95 = self.recovered95[:len(self.recovered95)-4:,:]
-
+        '''
 
         self.acc_dict = []
 
@@ -68,19 +71,27 @@ class AccVsSamples:
         # Empty list to store the accuracies at each step
         acc_dict=[]
         # fixed to 122. l is the reduced_dimension variable
-        l=18
+        l=11
 
         # loop over redced dimension or samples
         #for l in range(2,283,10):
-        for samples in range (2,30):
+        for samples in range (2,24):
             # Empty list declared to store accuraces, everytime the expriment is repeated
             acc=[]
             # Repeatation loop
-            for repeat in range(1,500):
-                _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), samples),:,:]
-                _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), samples),:,:]
-                _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), samples),:,:]
+            for repeat in range(1,600):
+                _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), samples+self.num_test),:,:]
+                _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), samples+self.num_test),:,:]
+                _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), samples+self.num_test),:,:]
                 
+                self.recovered10_test = _recovered10[:self.num_test,:,:]
+                self.recovered50_test = _recovered50[:self.num_test,:,:]
+                self.recovered95_test = _recovered95[:self.num_test,:,:]
+
+                _recovered10 = _recovered10[self.num_test:,:,:]
+                _recovered50 = _recovered50[self.num_test:,:,:]
+                _recovered95 = _recovered95[self.num_test:,:,:]
+
                 # Tucker is applied on tensor of each category to obtain core and factors
                 core10,factor10 = tucker(_recovered10, ranks = [_recovered10.shape[0],1,l])
                 core50,factor50 = tucker(_recovered50, ranks =  [_recovered50.shape[0],1,l])
@@ -117,7 +128,7 @@ class AccVsSamples:
                 clf.fit(xtrain,ytrain)
                 ypreds_knn = clf.predict(xtest)
 
-                clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
+                clf = MLPClassifier(solver='lbfgs',activation= 'relu', alpha=1e-5,early_stopping = True, hidden_layer_sizes=(16,32,64,32,16,2), random_state=1, max_iter=5000)
                 clf.fit(xtrain,ytrain)
                 ypreds_mlp = clf.predict(xtest)
 
@@ -125,12 +136,8 @@ class AccVsSamples:
                 clf.fit(xtrain,ytrain)
                 ypreds_svm = clf.predict(xtest)
 
-                clf = NearestCentroid()
-                clf.fit(xtrain,ytrain)
-                ypreds_nc = clf.predict(xtest)
 
-
-                acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_mlp), accuracy_score(ytest, ypreds_svm), accuracy_score(ytest, ypreds_nc)]))
+                acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_mlp), accuracy_score(ytest, ypreds_svm)]))
             acc_dict.append(np.mean(acc, axis=0))
             
         # To save accuracies as an checkpoint for later use
@@ -139,12 +146,12 @@ class AccVsSamples:
                 f.write("%s\n" % item)
         acc_dict = np.array(acc_dict)
 
-        _classifiers = ['kNN', 'MLP', 'SVM', 'Nearest Centroid']
+        _classifiers = ['kNN', 'MLP', 'SVM']
         # Plotting
         if acc_vs_samples:
             fig = plt.figure()
-            for _ in range(4):
-                plt.plot([i for i in range(2,30)], acc_dict[:,_], label = _classifiers[_])
+            for _ in range(3):
+                plt.plot([i for i in range(2,24)], acc_dict[:,_], label = _classifiers[_])
             fig.suptitle("Accuracy vs Samples")
             plt.xlabel("Samples")
             plt.ylabel("Accuracy")

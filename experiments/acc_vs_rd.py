@@ -31,8 +31,9 @@ class AccVsReducedDimension:
         recovered95 = sio.loadmat('Data/recovered95.mat')
         self.recovered95 = recovered95['recovered95_1']
 
-        self.num_test = 4
+        self.num_test = 10
         self.num_train = 20
+        '''
         self.recovered10_test = self.recovered10[-self.num_test:,:,:]
         self.recovered10 = self.recovered10[:len(self.recovered10)-4,:,:]
 
@@ -41,7 +42,7 @@ class AccVsReducedDimension:
 
         self.recovered95_test = self.recovered95[-self.num_test:,:,:]
         self.recovered95 = self.recovered95[:len(self.recovered95)-4:,:]
-
+        '''
 
         self.acc_dict = []
 
@@ -75,13 +76,20 @@ class AccVsReducedDimension:
             # Empty list declared to store accuraces, everytime the expriment is repeated
             acc=[]
             # Repeatation loop
-            for repeat in range(1,500):
+            for repeat in range(1,600):
                 import random
         
-                _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), self.num_train),:,:]
-                _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), self.num_train),:,:]
-                _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), self.num_train),:,:]
+                _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), self.num_train+self.num_test),:,:]
+                _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), self.num_train+self.num_test),:,:]
+                _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), self.num_train+self.num_test),:,:]
 
+                self.recovered10_test = _recovered10[:self.num_test,:,:]
+                self.recovered50_test = _recovered50[:self.num_test,:,:]
+                self.recovered95_test = _recovered95[:self.num_test,:,:]
+
+                _recovered10 = _recovered10[self.num_test:,:,:]
+                _recovered50 = _recovered50[self.num_test:,:,:]
+                _recovered95 = _recovered95[self.num_test:,:,:]
                 
                 # Tucker is applied on tensor of each category to obtain core and factors
                 core10,factor10 = tucker(_recovered10, ranks = [_recovered10.shape[0],1,l])
@@ -114,36 +122,36 @@ class AccVsReducedDimension:
                 clf = KNeighborsClassifier(n_neighbors=3)
                 clf.fit(xtrain,ytrain)
                 ypreds_knn = clf.predict(xtest)
-
+                '''
                 clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
                 clf.fit(xtrain,ytrain)
                 ypreds_mlp = clf.predict(xtest)
-
+                '''
                 clf = SVC(gamma='auto')
                 clf.fit(xtrain,ytrain)
                 ypreds_svm = clf.predict(xtest)
 
-                clf = NearestCentroid()
-                clf.fit(xtrain,ytrain)
-                ypreds_nc = clf.predict(xtest)
+  
 
 
-                acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_mlp), accuracy_score(ytest, ypreds_svm), accuracy_score(ytest, ypreds_nc)]))
+                acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_svm)]))
             acc_dict.append(np.mean(acc, axis=0))
-            
+          
         # To save accuracies as an checkpoint for later use
         with open('acc_dict.txt', 'w') as f:
             for item in np.array(acc_dict):
                 f.write("%s\n" % item)
         acc_dict = np.array(acc_dict)
 
-        _classifiers = ['kNN', 'MLP', 'SVM', 'Nearest Centroid']
+        _classifiers = ['kNN', 'SVM', 'SVM at L=283']
         # Plotting
 
         if not acc_vs_samples:
             fig = plt.figure()
-            for _ in range(4):
+            for _ in range(2):
                 plt.plot([i for i in range(2,283,10)], acc_dict[:,_], label = _classifiers[_])
+            svmatl = [acc_dict[-1,1] for i in range (2,283,10)]
+            plt.plot([i for i in range(2,283,10)], svmatl, label = _classifiers[2], color='green', linestyle ='dashed')
             fig.suptitle("Accuracy vs Reduced Dimension")
             plt.xlabel("Reduced Dimension")
             plt.ylabel("Accuracy")

@@ -48,13 +48,13 @@ $ python main.py --all # run this for acc_vs_ReducedDimension_vs_Samples
     <img src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_reducedDimension.png">
     
 </p>
-Fig. 4: Accuracys vs Reduced Dimension | Number of training samples per class: 20, Number of test samples per class: 4, Number of realizations: 500. MLP architecture: [solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2)]
+Fig. 4: Accuracys vs Reduced Dimension | Number of training samples per class: 20, Number of test samples per class: 4, Number of realizations: 600. MLP architecture: [solver='lbfgs', alpha=1e-5]
 
 <p align="center">
     <img  src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_samples.png">
 </p>
 
-Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30, Number of test samples: 4, reduced dimension l = 18, Number of realizations:500. MLP architecture:[solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2)]
+Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30, Number of test samples: 4, reduced dimension l = 18, Number of realizations:500. MLP architecture:[solver='lbfgs', alpha=1e-5]
 
 #### More on Classifiers: 
 * [MLP on Wikipedia](https://en.wikipedia.org/wiki/Multilayer_perceptron)
@@ -64,10 +64,8 @@ Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30
 * [Nearest Centroid](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestCentroid.html)
 
 
-[PM: Please specify the simulation details (k; crossvalidation method; number of realizations; reduced dimension; etc.)]
-[PM: Present the classifiers used in more detail. E.g., how was the MLP implmented]
+
 [PM: Cite any papers needed for the methods used]
 [PM: Present the structure of the tensor; discuss the tensor decomposition algorithm considered]
 [PM: Discuss the results and compare]
-[PM: Requested study on varying d(dimension) and #training (mesh plot)]
-[PM: Export this report in PDF and share with Dr. Puchades and me via email]
+

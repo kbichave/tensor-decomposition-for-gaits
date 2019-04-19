@@ -97,7 +97,7 @@ class AccVsReducedDimensionVsSamples:
                     test_decomposed50 = self.decomposed(factor50, self.recovered50_test,l)
                     test_decomposed95 = self.decomposed(factor95, self.recovered95_test,l)
                     
-                    print('Reduced Dimension: %i, Sample: %i, Repeat: %i'%(l,samples,repeat))
+                    print('Reduced Dimension: %i, Sample: %i, Repeat: %i'%(samples,repeat))
                     _Y = np.ravel(np.array([[1]*samples + [2]*samples + [3]*samples]))
                     X = np.concatenate((_decomposed10, _decomposed50, _decomposed95))
 
