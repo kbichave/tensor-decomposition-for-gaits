@@ -54,13 +54,14 @@ Fig. 4: Accuracys vs Reduced Dimension | Number of training samples per class: 2
     <img  src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_samples.png">
 </p>
 
-Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30, Number of test samples: 4, reduced dimension l = 18, Number of realizations:500. MLP architecture:[solver='lbfgs', alpha=1e-5]
+Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30, Number of test samples: 4, reduced dimension l = 18
 
 #### More on Classifiers: 
 * [MLP on Wikipedia](https://en.wikipedia.org/wiki/Multilayer_perceptron)
 * [More about MLP execution on SkLearn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)
 * [Support Vector Machine](https://scikit-learn.org/stable/modules/svm.html)
 * [k- Nearest Neighbour](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+##### Not used:
 * [Nearest Centroid](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestCentroid.html)
 
 
