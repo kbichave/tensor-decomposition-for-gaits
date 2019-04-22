@@ -48,7 +48,7 @@ $ python main.py --all # run this for acc_vs_ReducedDimension_vs_Samples
     <img src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_reducedDimension.png">
     
 </p>
-Fig. 4: Accuracys vs Reduced Dimension | Number of training samples per class: 20, Number of test samples per class: 4, Number of realizations: 600. MLP architecture: [solver='lbfgs', alpha=1e-5]
+Fig. 4: Accuracys vs Reduced Dimension | Number of training samples per class: 20, Number of test samples per class: 4, Number of realizations: 600. 
 
 <p align="center">
     <img  src="https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/Figures/acc_vs_samples.png">
@@ -63,8 +63,6 @@ Fig. 5: Accuracy vs Samples  | Number of training samples increased from 0 to 30
 * [k- Nearest Neighbour](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
 ##### Not used:
 * [Nearest Centroid](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestCentroid.html)
-
-Link to PDF version of this file: [Click Here](https://github.com/kbichave/tensor-decomposition-for-gaits/blob/master/PDFs/README.pdf)
 
 
 
