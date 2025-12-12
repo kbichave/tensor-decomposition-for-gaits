@@ -1,149 +1,173 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Feb 18 13:04:45 2019
+Accuracy vs Reduced Dimension vs Samples experiment.
 
-@author: kbich
+This experiment evaluates classification accuracy as a function of both
+the reduced dimension parameter and the number of training samples.
 """
-# sio is used to load .mat files
-import scipy.io as sio
-# Tensorly, the most buzzed, tensor library introduced by Dr. Anima Anandkumar and group
-import tensorly as tl
-from tensorly.decomposition import tucker
-import numpy as np
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.neighbors.nearest_centroid import NearestCentroid
+
+import logging
 import random
+from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.metrics import accuracy_score
+from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
+from tensorly.decomposition import tucker
 
-# Load tensors for 10%, 50% and 95% recovered data
+from experiments.base import TensorExperiment
 
-class AccVsReducedDimensionVsSamples:
-    def __init__(self):
-        recovered10 = sio.loadmat('Data/recovered10.mat')
-        self.recovered10 = recovered10['recovered10']
-
-        recovered50 = sio.loadmat('Data/recovered50.mat')
-        self.recovered50 = recovered50['recovered50']
-
-        recovered95 = sio.loadmat('Data/recovered95.mat')
-        self.recovered95 = recovered95['recovered95_1']
-
-        self.num_test = 4
-        self.num_train = 20
-        self.recovered10_test = self.recovered10[-self.num_test:,:,:]
-        self.recovered10 = self.recovered10[:len(self.recovered10)-4,:,:]
-
-        self.recovered50_test = self.recovered50[-self.num_test:,:,:]
-        self.recovered50 = self.recovered50[:len(self.recovered50)-4,:,:]
-
-        self.recovered95_test = self.recovered95[-self.num_test:,:,:]
-        self.recovered95 = self.recovered95[:len(self.recovered95)-4:,:]
+logger = logging.getLogger(__name__)
 
 
-        self.acc_dict = []
-
-    #function to decompose the matrix based on factors obtained
-    def decomposed(self,factor,recovered,l):
-        '''
-        Input: 
-            recovered: a tensor of the order (numberof samles, 3, 283)
-            factor: factors obtained by tensor decomposition for each of the category
-            l: reduced dimesion selected
-        Output:
-            matrix of the size (number of samples,l)
-
-        '''
-        unfolded =  np.dot(np.transpose(factor[1]) , tl.unfold(recovered, mode=1))
-        decompose = tl.fold(unfolded, mode=1, shape=[recovered.shape[0],1,283])
-        decompose = np.dot(decompose , factor[2])
-        
-        return np.reshape(decompose,(recovered.shape[0],l))
+class AccVsReducedDimensionVsSamples(TensorExperiment):
+    """
+    Experiment to evaluate accuracy vs both reduced dimension and samples.
     
-    def run_exp(self):
-        # Empty list to store the accuracies at each step
-        acc_dict=[]
-        # fixed to 122. l is the reduced_dimension variable
-        l=122
+    This class performs a 2D sweep over reduced dimension and number of
+    training samples, evaluating classification accuracy using kNN, MLP,
+    SVM, and Nearest Centroid classifiers.
+    """
 
-        # loop over redced dimension or samples
-        for l in range(2,283,10):
-            acc_samples = []
-            for samples in range (2,30):
-            # Empty list declared to store accuraces, everytime the expriment is repeated
-                acc=[]
-            # Repeatation loop
-                for repeat in range(1,500):
-                    
-                    _recovered10 = self.recovered10[random.sample(range(len(self.recovered10)), samples),:,:]
-                    _recovered50 = self.recovered50[random.sample(range(len(self.recovered50)), samples),:,:]
-                    _recovered95 = self.recovered95[random.sample(range(len(self.recovered95)), samples),:,:]
-                    
-                    # Tucker is applied on tensor of each category to obtain core and factors
-                    core10,factor10 = tucker(_recovered10, ranks = [_recovered10.shape[0],1,l])
-                    core50,factor50 = tucker(_recovered50, ranks =  [_recovered50.shape[0],1,l])
-                    core95,factor95 = tucker(_recovered95, ranks =  [_recovered95.shape[0],1,l])
-                    # Tensor of each category is decompsed based on the factors obtained earlier
-                    _decomposed10 = self.decomposed(factor10, _recovered10,l)
-                    _decomposed50 = self.decomposed(factor50, _recovered50,l)
-                    _decomposed95 = self.decomposed(factor95, _recovered95,l)
+    def __init__(self, data_dir: str = "Data", num_test: int = 4, num_train: int = 20):
+        """
+        Initialize the accuracy vs reduced dimension vs samples experiment.
+        
+        Args:
+            data_dir: Directory containing the .mat data files
+            num_test: Number of test samples per class
+            num_train: Number of training samples per class (not used in this experiment)
+        """
+        super().__init__(data_dir=data_dir, num_test=num_test, num_train=num_train)
+        
+        # Split test data from training data (fixed split for this experiment)
+        self.recovered10_test = self.recovered10[-self.num_test :, :, :]
+        self.recovered10 = self.recovered10[: len(self.recovered10) - 4, :, :]
 
-                    test_decomposed10 = self.decomposed(factor10, self.recovered10_test,l)
-                    test_decomposed50 = self.decomposed(factor50, self.recovered50_test,l)
-                    test_decomposed95 = self.decomposed(factor95, self.recovered95_test,l)
-                    
-                    print('Reduced Dimension: %i, Sample: %i, Repeat: %i'%(samples,repeat))
-                    _Y = np.ravel(np.array([[1]*samples + [2]*samples + [3]*samples]))
+        self.recovered50_test = self.recovered50[-self.num_test :, :, :]
+        self.recovered50 = self.recovered50[: len(self.recovered50) - 4, :, :]
+
+        self.recovered95_test = self.recovered95[-self.num_test :, :, :]
+        self.recovered95 = self.recovered95[: len(self.recovered95) - 4, :]
+
+    def run_exp(self) -> None:
+        """
+        Run the accuracy vs reduced dimension vs samples experiment.
+        
+        Performs a 2D sweep over reduced dimension (2 to 283, step 10) and
+        number of samples (2 to 29), evaluating classification accuracy over
+        500 random realizations.
+        """
+        acc_dict: List[List[np.ndarray]] = []
+
+        # Loop over reduced dimension
+        for l in range(2, 283, 10):
+            acc_samples: List[np.ndarray] = []
+            
+            # Loop over number of samples
+            for samples in range(2, 30):
+                acc: List[np.ndarray] = []
+                
+                # Repeat experiment multiple times for statistical significance
+                for repeat in range(1, 500):
+                    # Randomly sample training data
+                    _recovered10 = self.recovered10[
+                        random.sample(range(len(self.recovered10)), samples), :, :
+                    ]
+                    _recovered50 = self.recovered50[
+                        random.sample(range(len(self.recovered50)), samples), :, :
+                    ]
+                    _recovered95 = self.recovered95[
+                        random.sample(range(len(self.recovered95)), samples), :, :
+                    ]
+
+                    # Apply Tucker decomposition to obtain core and factors
+                    result10 = tucker(_recovered10, rank=[_recovered10.shape[0], 1, l])
+                    factor10 = result10.factors
+                    result50 = tucker(_recovered50, rank=[_recovered50.shape[0], 1, l])
+                    factor50 = result50.factors
+                    result95 = tucker(_recovered95, rank=[_recovered95.shape[0], 1, l])
+                    factor95 = result95.factors
+
+                    # Decompose tensors using obtained factors
+                    _decomposed10 = self.decomposed(factor10, _recovered10, l)
+                    _decomposed50 = self.decomposed(factor50, _recovered50, l)
+                    _decomposed95 = self.decomposed(factor95, _recovered95, l)
+
+                    test_decomposed10 = self.decomposed(factor10, self.recovered10_test, l)
+                    test_decomposed50 = self.decomposed(factor50, self.recovered50_test, l)
+                    test_decomposed95 = self.decomposed(factor95, self.recovered95_test, l)
+
+                    logger.info(f"Reduced Dimension: {l}, Sample: {samples}, Repeat: {repeat}")
+
+                    # Prepare training data
+                    _Y = np.ravel(np.array([[1] * samples + [2] * samples + [3] * samples]))
                     X = np.concatenate((_decomposed10, _decomposed50, _decomposed95))
 
-                    # The data into training-testing 
+                    # Prepare test data
                     xtrain = X
-                    xtest = np.concatenate((test_decomposed10,test_decomposed50,test_decomposed95))
+                    xtest = np.concatenate((test_decomposed10, test_decomposed50, test_decomposed95))
                     ytrain = _Y
-                    ytest = np.ravel(np.array([[1]*self.num_test + [2]*self.num_test + [3]*self.num_test]))
-                    # Classifiers are imported fsrom Sklearn, trained and tested. Accuracies are written
+                    ytest = np.ravel(
+                        np.array([[1] * self.num_test + [2] * self.num_test + [3] * self.num_test])
+                    )
 
-
-                    #clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
+                    # Train and evaluate kNN classifier
                     clf = KNeighborsClassifier(n_neighbors=3)
-                    clf.fit(xtrain,ytrain)
+                    clf.fit(xtrain, ytrain)
                     ypreds_knn = clf.predict(xtest)
 
-                    clf = MLPClassifier(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1)
-                    clf.fit(xtrain,ytrain)
+                    # Train and evaluate MLP classifier
+                    clf = MLPClassifier(
+                        solver="lbfgs", alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1
+                    )
+                    clf.fit(xtrain, ytrain)
                     ypreds_mlp = clf.predict(xtest)
 
-                    clf = SVC(gamma='auto')
-                    clf.fit(xtrain,ytrain)
+                    # Train and evaluate SVM classifier
+                    clf = SVC(gamma="auto")
+                    clf.fit(xtrain, ytrain)
                     ypreds_svm = clf.predict(xtest)
 
+                    # Train and evaluate Nearest Centroid classifier
                     clf = NearestCentroid()
-                    clf.fit(xtrain,ytrain)
+                    clf.fit(xtrain, ytrain)
                     ypreds_nc = clf.predict(xtest)
 
-                    acc.append(np.array([accuracy_score(ytest, ypreds_knn) , accuracy_score(ytest, ypreds_mlp), accuracy_score(ytest, ypreds_svm), accuracy_score(ytest, ypreds_nc)]))
+                    # Store accuracies
+                    acc.append(
+                        np.array(
+                            [
+                                accuracy_score(ytest, ypreds_knn),
+                                accuracy_score(ytest, ypreds_mlp),
+                                accuracy_score(ytest, ypreds_svm),
+                                accuracy_score(ytest, ypreds_nc),
+                            ]
+                        )
+                    )
+
                 acc_samples.append(np.mean(acc, axis=0))
             acc_dict.append(acc_samples)
-        # To save accuracies as an checkpoint for later use
-        with open('acc_dict.txt', 'w') as f:
+
+        # Save accuracies as checkpoint
+        output_path = Path("acc_dict.txt")
+        with open(output_path, "w") as f:
             for item in np.array(acc_dict):
                 f.write("%s\n" % item)
+
         acc_dict = np.array(acc_dict)
 
-        _classifiers = ['kNN', 'MLP', 'SVM', 'Nearest Centroid']
-        # Plotting
+        # Plotting - 3D surface plot
+        _classifiers = ["kNN", "MLP", "SVM", "Nearest Centroid"]
         hf = plt.figure()
-        ha = hf.add_subplot(111, projection='3d')
-        x = [i for i in range(2,283,18)]
-        y = [i for i in range(2,30)]
+        ha = hf.add_subplot(111, projection="3d")
+        x = [i for i in range(2, 283, 10)]
+        y = [i for i in range(2, 30)]
         X, Y = np.meshgrid(x, y)  # `plot_surface` expects `x` and `y` data to be 2D
         for _ in range(4):
-            ha.plot_surface(X, Y, acc_dict[:,_], label = _classifiers[_])
+            ha.plot_surface(X, Y, acc_dict[:, :, _], label=_classifiers[_])
         plt.show()
-
-        
